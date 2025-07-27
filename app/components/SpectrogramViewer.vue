@@ -17,6 +17,13 @@
         >
           Spectrogram
         </button>
+        <button
+          class="control-button"
+          :class="{ active: viewMode === 'draw' }"
+          @click="viewMode = 'draw'"
+        >
+          Draw Sound
+        </button>
         <button class="control-button" @click="toggleZoom">
           {{ isZoomed ? "Zoom Out" : "Zoom In" }}
         </button>
@@ -26,8 +33,18 @@
       </div>
     </div>
 
-    <div class="visualization-container">
+    <div class="visualization-container" v-show="viewMode !== 'draw'">
       <div ref="waveformRef" id="waveform"></div>
+    </div>
+
+    <div v-if="viewMode === 'draw'" class="drawing-container">
+      <SpectrogramDrawer 
+        :width="800"
+        :height="256"
+        :sample-rate="44100"
+        :duration="duration || 5"
+        @audio-generated="handleGeneratedAudio"
+      />
     </div>
 
     <AudioControl
@@ -50,7 +67,7 @@ const props = defineProps({
   fileName: String,
 });
 
-const emit = defineEmits(["remove-file"]);
+const emit = defineEmits(["remove-file", "audio-generated"]);
 
 const waveformRef = ref(null);
 const viewMode = ref("waveform");
@@ -180,6 +197,10 @@ const toggleZoom = () => {
   }
 };
 
+const handleGeneratedAudio = (audioBlob) => {
+  emit("audio-generated", audioBlob);
+};
+
 const createColorMap = () => {
   const colors = [];
   for (let i = 0; i < 256; i++) {
@@ -283,5 +304,9 @@ watch(
     width: 100%;
     min-height: 150px;
   }
+}
+
+.drawing-container {
+  margin-bottom: 2rem;
 }
 </style>
