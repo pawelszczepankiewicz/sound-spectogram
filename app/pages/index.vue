@@ -21,6 +21,16 @@
         </svg>
         Draw Sound
       </button>
+      <button 
+        class="mode-button"
+        :class="{ active: mode === 'image' }"
+        @click="setModeImage"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M13.5,16L10,11.5L7,15H17L13.5,16Z"/>
+        </svg>
+        Image to Sound
+      </button>
     </div>
 
     <div v-if="mode === 'analyze'">
@@ -59,6 +69,23 @@
         @audio-generated="handleGeneratedAudio"
       />
     </div>
+
+    <div v-if="mode === 'image'" class="image-mode">
+      <div class="create-header">
+        <h2>Convert Image to Sound</h2>
+        <p>Upload any image and hear it as audio through spectrogram conversion</p>
+      </div>
+      
+      <ImageToSpectrogram @audio-generated="handleGeneratedAudio" />
+      
+      <SpectrogramViewer
+        v-if="audioUrl && !isLoading && currentFile"
+        :audio-url="audioUrl"
+        :file-name="currentFile?.name"
+        @remove-file="removeFile"
+        @audio-generated="handleGeneratedAudio"
+      />
+    </div>
   </div>
 </template>
 
@@ -78,6 +105,10 @@ const setModeAnalyze = () => {
 
 const setModeCreate = () => {
   mode.value = 'create';
+};
+
+const setModeImage = () => {
+  mode.value = 'image';
 };
 
 const handleFileUpload = async (file) => {
@@ -136,6 +167,7 @@ onUnmounted(() => {
   gap: 1rem;
   justify-content: center;
   margin-bottom: 3rem;
+  flex-wrap: wrap;
   
   @include mobile {
     flex-direction: column;
@@ -177,7 +209,8 @@ onUnmounted(() => {
   }
 }
 
-.create-mode {
+.create-mode,
+.image-mode {
   animation: fadeInUp 0.8s ease-out;
 }
 
